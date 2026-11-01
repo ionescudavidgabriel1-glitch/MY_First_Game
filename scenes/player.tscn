@@ -1,0 +1,169 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://scripts/player.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/front_0.png" id="f_front_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/front_1.png" id="f_front_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/back_0.png" id="f_back_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/back_1.png" id="f_back_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/side_0.png" id="f_side_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/side_1.png" id="f_side_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/side_2.png" id="f_side_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/side_3.png" id="f_side_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/front_0.png" id="d_front_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/back_0.png" id="d_back_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/side_0.png" id="d_side_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/side_idle.png" id="d_side_idle"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_player"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("f_front_0")
+}],
+"loop": true,
+"name": &"farmer_idle_front",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("f_back_0")
+}],
+"loop": true,
+"name": &"farmer_idle_back",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("f_side_0")
+}],
+"loop": true,
+"name": &"farmer_idle_side",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("f_front_0")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_front_1")
+}],
+"loop": true,
+"name": &"farmer_walk_front",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("f_back_0")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_back_1")
+}],
+"loop": true,
+"name": &"farmer_walk_back",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("f_side_1")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_side_0")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_side_3")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_side_2")
+}],
+"loop": true,
+"name": &"farmer_walk_side",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("d_front_0")
+}],
+"loop": true,
+"name": &"drug_lord_idle_front",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("d_back_0")
+}],
+"loop": true,
+"name": &"drug_lord_idle_back",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("d_side_idle")
+}],
+"loop": true,
+"name": &"drug_lord_idle_side",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("d_front_0")
+}],
+"loop": true,
+"name": &"drug_lord_walk_front",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("d_back_0")
+}],
+"loop": true,
+"name": &"drug_lord_walk_back",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("d_side_0")
+}],
+"loop": true,
+"name": &"drug_lord_walk_side",
+"speed": 5.0
+}]
+
+[sub_resource type="Gradient" id="Gradient_shadow"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.95)
+colors = PackedColorArray(0, 0, 0, 0.3, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture_shadow"]
+gradient = SubResource("Gradient_shadow")
+width = 26
+height = 8
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape_feet"]
+size = Vector2(20, 8)
+
+[node name="Player" type="CharacterBody2D"]
+motion_mode = 1
+script = ExtResource("1_script")
+
+[node name="Shadow" type="Sprite2D" parent="."]
+position = Vector2(0, -1)
+texture = SubResource("GradientTexture_shadow")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_player")
+animation = &"farmer_idle_front"
+autoplay = "farmer_idle_front"
+offset = Vector2(0, -28)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape_feet")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(0, -28)
+zoom = Vector2(3, 3)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0

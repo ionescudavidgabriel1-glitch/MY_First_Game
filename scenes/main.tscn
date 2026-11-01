@@ -1,0 +1,58 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/test_ground.gd" id="2_ground"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
+[ext_resource type="Script" path="res://scripts/field.gd" id="4_field"]
+[ext_resource type="Resource" path="res://data/crops/tomato.tres" id="5_tomato"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="TestGround" type="Sprite2D" parent="."]
+script = ExtResource("2_ground")
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Player" parent="World" instance=ExtResource("3_player")]
+
+[node name="Field" type="Node2D" parent="World" node_paths=PackedStringArray("player")]
+y_sort_enabled = true
+position = Vector2(64, -64)
+script = ExtResource("4_field")
+crop = ExtResource("5_tomato")
+player = NodePath("../Player")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="DayLabel" type="Label" parent="HUD"]
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 132.0
+offset_bottom = 36.0
+theme_override_font_sizes/font_size = 16
+text = "Day 1"
+
+[node name="HarvestLabel" type="Label" parent="HUD"]
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 212.0
+offset_bottom = 100.0
+theme_override_font_sizes/font_size = 14
+
+[node name="IdentityButton" type="Button" parent="HUD"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -98.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 38.0
+grow_horizontal = 0
+focus_mode = 0
+theme_override_font_sizes/font_size = 13
+text = "Farmer"
+
+[connection signal="identity_changed" from="World/Player" to="HUD/IdentityButton" method="set_text"]
+[connection signal="pressed" from="HUD/IdentityButton" to="World/Player" method="toggle_identity"]

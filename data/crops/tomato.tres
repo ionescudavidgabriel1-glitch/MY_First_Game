@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CropData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/crop_data.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/crops/tomato/stage_1.png" id="2_stage1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/crops/tomato/stage_2.png" id="3_stage2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/crops/tomato/stage_3.png" id="4_stage3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/crops/tomato/stage_4.png" id="5_stage4"]
+
+[resource]
+script = ExtResource("1_script")
+display_name = "Tomatoes"
+stage_textures = Array[Texture2D]([ExtResource("2_stage1"), ExtResource("3_stage2"), ExtResource("4_stage3"), ExtResource("5_stage4")])
+days_per_stage = 1
+regrow_stage = 2
+regrow_days = 2
