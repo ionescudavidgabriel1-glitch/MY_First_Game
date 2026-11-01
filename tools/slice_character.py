@@ -1,8 +1,9 @@
-"""Cuts player frames out of assets/character.png into assets/sprites/player/.
+"""Cuts the player walk frames out of the sheets into assets/sprites/player/.
 
-The sheet is 480x268 pixel art upscaled to 2752x1536, on an opaque background
-with baked-in grid lines and shadows. This restores the native resolution and
-removes those. Requires Pillow, NumPy and SciPy. Run from the project root:
+The sheets have different pixel sizes, and the farmer's rows differ in height,
+so each row is scaled on its own until the figure is TARGET_HEIGHT tall. That
+keeps the character the same size when he turns or switches identity. Requires
+Pillow, NumPy and SciPy. Run from the project root:
 
     python tools/slice_character.py
 """
@@ -12,126 +13,104 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage as ndi
 
-SOURCE = Path("assets/character.png")
 OUTPUT = Path("assets/sprites/player")
-NATIVE_SIZE = (480, 268)
 CANVAS_SIZE = (44, 56)  # Feet sit on the bottom edge of the canvas.
+TARGET_HEIGHT = 48
+MIN_FIGURE_AREA = 3000  # In sheet pixels. Smaller blobs are not figures.
+SAME_ROW_DISTANCE = 100  # Figures whose tops are this close share a row.
 
-# Shadow, background and grid colors all lie along this line in RGB space.
-SHADOW_RGB = np.array([33, 35, 44], float)
-GRID_RGB = np.array([107, 115, 126], float)
-BACKGROUND_TOLERANCE = 11
-
-# Rows of the sheet, in native pixels: (top, bottom). Figures start at x = 78.
-SURFACE_ROW = (33, 86)
-UNDERGROUND_ROW = (153, 208)
-LEFT_MARGIN = 78
-
-# The side-view gas mask matches the grid color and its outline has gaps, so
-# background removal can't tell them apart. These native pixels are forced to
-# stay, as y: (first x, last x).
-PROTECTED_SPANS = {
-    168: (398, 413), 169: (398, 414), 170: (398, 414), 171: (401, 414),
-    172: (401, 414), 173: (400, 413), 174: (400, 408),
-}
-FEET_ROWS = 8
-
-# Output name -> index of the figure in its row, counted left to right.
-SURFACE_FRAMES = {
-    "front_0": 0, "front_1": 6,
-    "back_0": 1, "back_1": 4,
-    "side_0": 8, "side_1": 5, "side_2": 2, "side_3": 7,
-}
-UNDERGROUND_FRAMES = {"front_0": 4, "back_0": 6, "side_0": 7, "side_idle": 8}
+# Each output row: (folder, name, sheet, row in the sheet, figures to use).
+# Figures count left to right. The farmer's front figures 2, 4 and 5 turn
+# sideways, and drog_dealer.jpg's side row never brings the legs together, so
+# the Drug Lord's side walk comes from its own sheet.
+ROWS = [
+    ("farmer", "front", "assets/farmer.jpg", 0, [0, 1, 3]),
+    ("farmer", "back", "assets/farmer.jpg", 1, [0, 1, 2, 3, 4, 5]),
+    ("farmer", "side", "assets/farmer.jpg", 2, [0, 1, 2, 3, 4, 5, 6]),
+    ("drug_lord", "front", "assets/drog_dealer.jpg", 0, [0, 1, 2, 3]),
+    ("drug_lord", "back", "assets/drog_dealer.jpg", 1, [0, 1, 2, 3]),
+    ("drug_lord", "side", "assets/drog_lord2.jpg", 0, [0, 1, 2, 3, 4, 5]),
+]
 
 
-def to_native(path):
-    image = np.asarray(Image.open(path).convert("RGB")).astype(float)
-    height, width, _ = image.shape
-    native_w, native_h = NATIVE_SIZE
-    scale_x, scale_y = width / native_w, height / native_h
-    native = np.zeros((native_h, native_w, 3), np.uint8)
-    for j in range(native_h):
-        for i in range(native_w):
-            # The median of each block's center ignores blur at its edges.
-            x0 = int(i * scale_x + 1.5)
-            x1 = max(int((i + 1) * scale_x - 1.5), x0 + 1)
-            y0 = int(j * scale_y + 1.5)
-            y1 = max(int((j + 1) * scale_y - 1.5), y0 + 1)
-            native[j, i] = np.median(image[y0:y1, x0:x1].reshape(-1, 3), axis=0)
-    return native
+def foreground_mask(image):
+    """Everything except the magenta background and its purple shadow."""
+    r, g, b = image[..., 0], image[..., 1], image[..., 2]
+    return ~((np.abs(r - b) < 40) & (np.minimum(r, b) - g > 40))
 
 
-def background_like(rgb):
-    axis = GRID_RGB - SHADOW_RGB
-    t = np.clip(((rgb - SHADOW_RGB) @ axis) / (axis @ axis), 0, 1)
-    closest = SHADOW_RGB + t[..., None] * axis
-    return np.linalg.norm(rgb - closest, axis=2) < BACKGROUND_TOLERANCE
-
-
-def find_figures(native, row):
-    """Returns (rgb, mask) per figure, left to right, in row-sized crops."""
-    band = native[row[0]:row[1], LEFT_MARGIN:]
-    removable = background_like(band)
-    for y, (first, last) in PROTECTED_SPANS.items():
-        if row[0] <= y < row[1]:
-            removable[y - row[0], first - LEFT_MARGIN:last + 1 - LEFT_MARGIN] = False
-    labels, _ = ndi.label(removable)
-    # Only background connected to the band's edge is removed, so colors
-    # enclosed by a dark outline survive even if they match the background.
-    edge = np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]])
-    outside = np.isin(labels, np.unique(edge[edge > 0]))
-    figures, _ = ndi.label(~outside, np.ones((3, 3)))
+def find_rows(image):
+    """Returns the sheet's rows, each a left-to-right list of (rgb, mask)."""
+    mask = foreground_mask(image)
+    # Opening drops JPEG specks so they can't join figures or count as one.
+    labels, _ = ndi.label(ndi.binary_opening(mask, np.ones((5, 5))), np.ones((3, 3)))
     found = []
-    for index, slices in enumerate(ndi.find_objects(figures), 1):
-        mask = figures[slices] == index
-        if mask.sum() >= 150:
-            found.append((slices[1].start, band[slices], mask))
-    found.sort(key=lambda item: item[0])
-    return [(rgb, mask) for _, rgb, mask in found]
+    for index, slices in enumerate(ndi.find_objects(labels), 1):
+        if (labels[slices] == index).sum() > MIN_FIGURE_AREA:
+            found.append((slices[0].start, slices[1].start, index))
+    rows = []
+    for top, left, index in sorted(found):
+        for row in rows:
+            if abs(row[0][0] - top) < SAME_ROW_DISTANCE:
+                row.append((top, left, index))
+                break
+        else:
+            rows.append([(top, left, index)])
+    return [[_crop(image, mask, labels, f[2]) for f in sorted(row, key=lambda f: f[1])] for row in rows]
 
 
-def repair_edges(mask):
-    """Fills pinholes and drops stray pixels left by the background removal."""
-    mask = mask.copy()
-    # Grid lines touch the boots. They are thin, so opening removes them.
-    mask[-FEET_ROWS:] = ndi.binary_opening(mask, np.ones((2, 2)))[-FEET_ROWS:]
-    kernel = np.ones((3, 3), int)
-    kernel[1, 1] = 0
-    for _ in range(2):
-        neighbours = ndi.convolve(mask.astype(int), kernel, mode="constant")
-        mask = (mask & (neighbours >= 2)) | (~mask & (neighbours >= 6))
-    # Side-by-side connectivity only, so specks touching at a corner are dropped.
-    labels, count = ndi.label(mask)
-    if count > 1:
-        sizes = ndi.sum(mask, labels, range(1, count + 1))
-        mask = labels == int(np.argmax(sizes)) + 1
-    return mask
+def _crop(image, mask, labels, index):
+    # Dilating restores the thin edge pixels that the opening removed.
+    region = ndi.binary_dilation(labels == index, np.ones((9, 9))) & mask
+    ys, xs = np.nonzero(region)
+    box = (slice(ys.min(), ys.max() + 1), slice(xs.min(), xs.max() + 1))
+    return image[box], region[box]
 
 
-def to_canvas(rgb, mask):
+def shrink(rgb, mask, scale):
+    """Downscales using each block's median, so JPEG noise doesn't show."""
+    height, width = mask.shape
+    new_h, new_w = max(1, round(height * scale)), max(1, round(width * scale))
+    edges_y = np.linspace(0, height, new_h + 1).astype(int)
+    edges_x = np.linspace(0, width, new_w + 1).astype(int)
+    out = np.zeros((new_h, new_w, 4), np.uint8)
+    for j in range(new_h):
+        for i in range(new_w):
+            y = slice(edges_y[j], max(edges_y[j + 1], edges_y[j] + 1))
+            x = slice(edges_x[i], max(edges_x[i + 1], edges_x[i] + 1))
+            block = mask[y, x]
+            if block.mean() >= 0.5:
+                out[j, i, :3] = np.median(rgb[y, x][block], axis=0)
+                out[j, i, 3] = 255
+    return out
+
+
+def to_canvas(pixels):
     """Centers on the figure's mass, so frames don't jitter sideways."""
     canvas_w, canvas_h = CANVAS_SIZE
+    opaque = pixels[..., 3] > 0
+    rows = np.nonzero(opaque.any(axis=1))[0]
+    pixels = pixels[rows.min():rows.max() + 1]
+    opaque = opaque[rows.min():rows.max() + 1]
+    offset_x = canvas_w // 2 - int(round(np.nonzero(opaque)[1].mean()))
+    offset_y = canvas_h - pixels.shape[0]
     canvas = np.zeros((canvas_h, canvas_w, 4), np.uint8)
-    offset_x = canvas_w // 2 - int(round(np.nonzero(mask)[1].mean()))
-    offset_y = canvas_h - mask.shape[0]
-    for y, x in zip(*np.nonzero(mask)):
-        canvas[y + offset_y, x + offset_x] = (*rgb[y, x], 255)
+    for y, x in zip(*np.nonzero(opaque)):
+        canvas[y + offset_y, x + offset_x] = pixels[y, x]
     return Image.fromarray(canvas, "RGBA")
 
 
-def export(native, row, frames, folder):
-    figures = find_figures(native, row)
-    (OUTPUT / folder).mkdir(parents=True, exist_ok=True)
-    for name, index in frames.items():
-        rgb, mask = figures[index]
-        to_canvas(rgb, repair_edges(mask)).save(OUTPUT / folder / f"{name}.png")
-
-
 def main():
-    native = to_native(SOURCE)
-    export(native, SURFACE_ROW, SURFACE_FRAMES, "farmer")
-    export(native, UNDERGROUND_ROW, UNDERGROUND_FRAMES, "drug_lord")
+    sheets = {}
+    for folder, name, sheet, row, figures in ROWS:
+        if sheet not in sheets:
+            image = np.asarray(Image.open(sheet).convert("RGB")).astype(int)
+            sheets[sheet] = find_rows(image)
+        chosen = [sheets[sheet][row][index] for index in figures]
+        scale = TARGET_HEIGHT / float(np.median([mask.shape[0] for _, mask in chosen]))
+        (OUTPUT / folder).mkdir(parents=True, exist_ok=True)
+        for number, (rgb, mask) in enumerate(chosen):
+            to_canvas(shrink(rgb, mask, scale)).save(OUTPUT / folder / f"{name}_{number}.png")
 
 
 if __name__ == "__main__":

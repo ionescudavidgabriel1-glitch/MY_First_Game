@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ckdk8h7q5aj7a"
-path="res://.godot/imported/side_idle.png-2420482c377df94f4f25237541c56a20.ctex"
+uid="uid://cgeyhyl41faua"
+path="res://.godot/imported/side_6.png-678aec64bbb6b89cd04790512a6b3584.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/player/drug_lord/side_idle.png"
-dest_files=["res://.godot/imported/side_idle.png-2420482c377df94f4f25237541c56a20.ctex"]
+source_file="res://assets/sprites/player/farmer/side_6.png"
+dest_files=["res://.godot/imported/side_6.png-678aec64bbb6b89cd04790512a6b3584.ctex"]
 
 [params]
 

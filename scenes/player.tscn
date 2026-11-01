@@ -1,18 +1,36 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=36 format=3]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/front_0.png" id="f_front_0"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/front_1.png" id="f_front_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/front_2.png" id="f_front_2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/back_0.png" id="f_back_0"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/back_1.png" id="f_back_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/back_2.png" id="f_back_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/back_3.png" id="f_back_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/back_4.png" id="f_back_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/back_5.png" id="f_back_5"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/side_0.png" id="f_side_0"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/side_1.png" id="f_side_1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/side_2.png" id="f_side_2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/side_3.png" id="f_side_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/side_4.png" id="f_side_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/side_5.png" id="f_side_5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/farmer/side_6.png" id="f_side_6"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/front_0.png" id="d_front_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/front_1.png" id="d_front_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/front_2.png" id="d_front_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/front_3.png" id="d_front_3"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/back_0.png" id="d_back_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/back_1.png" id="d_back_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/back_2.png" id="d_back_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/back_3.png" id="d_back_3"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/side_0.png" id="d_side_0"]
-[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/side_idle.png" id="d_side_idle"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/side_1.png" id="d_side_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/side_2.png" id="d_side_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/side_3.png" id="d_side_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/side_4.png" id="d_side_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/drug_lord/side_5.png" id="d_side_5"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_player"]
 animations = [{
@@ -46,10 +64,13 @@ animations = [{
 },{
 "duration": 1.0,
 "texture": ExtResource("f_front_1")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_front_2")
 }],
 "loop": true,
 "name": &"farmer_walk_front",
-"speed": 4.0
+"speed": 8.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -57,23 +78,44 @@ animations = [{
 },{
 "duration": 1.0,
 "texture": ExtResource("f_back_1")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_back_2")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_back_3")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_back_4")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_back_5")
 }],
 "loop": true,
 "name": &"farmer_walk_back",
-"speed": 4.0
+"speed": 8.0
 }, {
 "frames": [{
+"duration": 1.0,
+"texture": ExtResource("f_side_0")
+},{
 "duration": 1.0,
 "texture": ExtResource("f_side_1")
 },{
 "duration": 1.0,
-"texture": ExtResource("f_side_0")
+"texture": ExtResource("f_side_2")
 },{
 "duration": 1.0,
 "texture": ExtResource("f_side_3")
 },{
 "duration": 1.0,
-"texture": ExtResource("f_side_2")
+"texture": ExtResource("f_side_4")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_side_5")
+},{
+"duration": 1.0,
+"texture": ExtResource("f_side_6")
 }],
 "loop": true,
 "name": &"farmer_walk_side",
@@ -97,7 +139,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("d_side_idle")
+"texture": ExtResource("d_side_0")
 }],
 "loop": true,
 "name": &"drug_lord_idle_side",
@@ -106,26 +148,59 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("d_front_0")
+},{
+"duration": 1.0,
+"texture": ExtResource("d_front_1")
+},{
+"duration": 1.0,
+"texture": ExtResource("d_front_2")
+},{
+"duration": 1.0,
+"texture": ExtResource("d_front_3")
 }],
 "loop": true,
 "name": &"drug_lord_walk_front",
-"speed": 5.0
+"speed": 8.0
 }, {
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("d_back_0")
+},{
+"duration": 1.0,
+"texture": ExtResource("d_back_1")
+},{
+"duration": 1.0,
+"texture": ExtResource("d_back_2")
+},{
+"duration": 1.0,
+"texture": ExtResource("d_back_3")
 }],
 "loop": true,
 "name": &"drug_lord_walk_back",
-"speed": 5.0
+"speed": 8.0
 }, {
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("d_side_0")
+},{
+"duration": 1.0,
+"texture": ExtResource("d_side_1")
+},{
+"duration": 1.0,
+"texture": ExtResource("d_side_2")
+},{
+"duration": 1.0,
+"texture": ExtResource("d_side_3")
+},{
+"duration": 1.0,
+"texture": ExtResource("d_side_4")
+},{
+"duration": 1.0,
+"texture": ExtResource("d_side_5")
 }],
 "loop": true,
 "name": &"drug_lord_walk_side",
-"speed": 5.0
+"speed": 8.0
 }]
 
 [sub_resource type="Gradient" id="Gradient_shadow"]
@@ -163,6 +238,7 @@ position = Vector2(0, -4)
 shape = SubResource("RectangleShape_feet")
 
 [node name="Camera2D" type="Camera2D" parent="."]
+process_callback = 0
 position = Vector2(0, -28)
 zoom = Vector2(3, 3)
 position_smoothing_enabled = true

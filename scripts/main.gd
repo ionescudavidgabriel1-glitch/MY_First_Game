@@ -3,6 +3,8 @@ extends Node2D
 var day := 1
 var _harvest_counts := {}  # Crop display name -> amount
 
+@onready var ground: TileMapLayer = $Ground
+@onready var camera: Camera2D = $World/Player/Camera2D
 @onready var field: Node2D = $World/Field
 @onready var day_label: Label = $HUD/DayLabel
 @onready var harvest_label: Label = $HUD/HarvestLabel
@@ -10,7 +12,18 @@ var _harvest_counts := {}  # Crop display name -> amount
 
 func _ready() -> void:
 	field.harvested.connect(_on_field_harvested)
+	_fit_camera_to_map()
 	_update_hud()
+
+
+func _fit_camera_to_map() -> void:
+	# Follows the painted ground, so repainting the map needs no code change.
+	var map := Rect2i(ground.get_used_rect().position * ground.tile_set.tile_size,
+			ground.get_used_rect().size * ground.tile_set.tile_size)
+	camera.limit_left = map.position.x
+	camera.limit_top = map.position.y
+	camera.limit_right = map.end.x
+	camera.limit_bottom = map.end.y
 
 
 func _unhandled_input(event: InputEvent) -> void:
