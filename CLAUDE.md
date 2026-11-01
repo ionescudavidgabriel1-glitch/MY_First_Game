@@ -85,6 +85,16 @@ The Godot MCP tools look in `C:\Program Files\Godot\Godot.exe` and fail unless `
 ## Art for later
 `assets/character_V2.jpg` has hoe and crafting animations. The title text overlaps some frames, and the crafting table is part of the drawing.
 
+## Where we left off
+Work is on the `farm-map` branch, not yet merged into `main`. Map step 1 (ground and edges) is confirmed. Next is map step 2, the harvest area. Nothing for it is built yet.
+
+Ask the user these first (recommended option first in each):
+1. Soil look: (a) trimmed dry soil from `ground_tiles.jpg`, with an outline only on the faced plot; (b) same soil with thin lines between plots; (c) keep the drawn squares.
+2. Gate in `assets/word/fences.jpg`: (a) E opens and closes it, and closed blocks the player; (b) opens by itself when walked up to; (c) always open, decoration only.
+3. Fence blocks the player: (a) yes, in and out only through the gate; (b) no, for now.
+
+Check that the fence pieces join cleanly after cutting, and show the user any that don't. The mine art (`assets/word/mine.jpg`, needed by step 6) has not been generated yet.
+
 ## Roadmap
 Each item is one small step.
 
